@@ -213,7 +213,7 @@ class AlexaShoppingList:
             print(f" -> send_keys failed: {e}")
 
         # 2. Fallback to JS injection with proper events if typing failed
-        if not typed or password_field.get_attribute("value") == "":
+        if not typed:
             print(" -> Falling back to JS value injection")
             self.driver.execute_script("""
                 const el = arguments[0];
@@ -374,11 +374,16 @@ class AlexaShoppingList:
 
     def _ensure_driver_is_on_alexa_list(self, refresh: bool = False):
         list_url = "https://www."+self.amazon_url+"/alexaquantum/sp/alexaShoppingList?ref=nav_asl"
-        if self.driver.current_url != list_url:
-            self._selenium_get(list_url, (By.CLASS_NAME, 'list-header'))
-        elif refresh == True:
+        on_list_page = self.driver.current_url.startswith(
+            "https://www."+self.amazon_url+"/alexaquantum/sp/alexaShoppingList"
+        )
+        if not on_list_page:
+            self._selenium_get(list_url, (By.ID, 'asl-web-context'))
+            self._selenium_wait_element((By.CLASS_NAME, 'virtual-list'))
+        elif refresh:
             self.driver.refresh()
-            self._selenium_wait_element((By.CLASS_NAME, 'list-header'))
+            self._selenium_wait_element((By.ID, 'asl-web-context'))
+            self._selenium_wait_element((By.CLASS_NAME, 'virtual-list'))
 
 
     def get_alexa_list(self, refresh: bool = True):
@@ -441,7 +446,9 @@ class AlexaShoppingList:
         if element != None:
             return
 
-        self.driver.find_element(By.CLASS_NAME, 'list-header').find_element(By.CLASS_NAME, 'add-symbol').click()
+        self.get_screenshot("before_add_item")
+        list_header = self.driver.find_element(By.CLASS_NAME, 'list-header')
+        list_header.find_element(By.CLASS_NAME, 'add-symbol').click()
 
         textfield = self.driver.find_element(By.CLASS_NAME, 'list-header').find_element(By.CLASS_NAME, 'input-box').find_element(By.TAG_NAME, 'input')
         textfield.send_keys(item)
