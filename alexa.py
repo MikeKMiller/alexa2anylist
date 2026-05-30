@@ -44,15 +44,22 @@ class AlexaShoppingList:
 
 
     def _setup_driver(self):
-        user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
-
         chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("window-size=1366,768")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument(f"--user-agent={user_agent}")
+
+        debug_port = os.environ.get("CLOAK_BROWSER_DEBUG_PORT", "")
+        if debug_port:
+            # Connect to a running CloakBrowser instance via CDP.
+            # Launch CloakBrowser with --remote-debugging-port=<port> first.
+            chrome_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{debug_port}")
+        else:
+            # Fallback: launch a regular Chrome/Chromium process (Docker / CI).
+            user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36"
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("window-size=1366,768")
+            chrome_options.add_argument("--disable-gpu")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+            chrome_options.add_argument(f"--user-agent={user_agent}")
 
         chrome_options.set_capability("goog:loggingPrefs", {"browser": "ALL"})
 

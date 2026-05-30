@@ -43,6 +43,31 @@ should continue from where it left off.
 
 The pre-built container is at available on dockerhub: https://hub.docker.com/r/alexiri/alexa2anylist
 
+## Running locally with CloakBrowser (Windows / macOS)
+
+CloakBrowser is an anti-detect browser that avoids Amazon's bot-detection better than headless Chrome.
+
+1. Install dependencies (outside Docker):
+   ```
+   pip install -r requirements.txt
+   ```
+
+2. Launch CloakBrowser with remote debugging enabled, e.g.:
+   ```
+   "C:\Program Files\CloakBrowser\CloakBrowser.exe" --remote-debugging-port=9222
+   ```
+
+3. Set environment variables and run:
+   ```
+   set CONFIG_PATH=C:\data\alexa2anylist
+   set CLOAK_BROWSER_DEBUG_PORT=9222
+   set CHROME_DRIVER=C:\path\to\chromedriver.exe
+   python server.py
+   ```
+
+   `CHROME_DRIVER` should point to the chromedriver that ships with CloakBrowser (same version as its embedded Chromium).  
+   `CONFIG_PATH` is the folder containing `config.json`, `journal.json`, and credential cache files.
+
 ## Credits
 
 Based on https://github.com/madmachinations/home-assistant-alexa-shopping-list for the
